@@ -1,6 +1,9 @@
+import 'package:awesome_dialog/awesome_dialog.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'dart:math' as math;
 import 'package:flutter_fluid_slider/flutter_fluid_slider.dart';
+import 'package:gradientx/models/card.dart';
+import 'package:hive/hive.dart';
 
 class Main extends StatefulWidget {
   Main({
@@ -25,9 +28,17 @@ class _MainState extends State<Main> with AutomaticKeepAliveClientMixin<Main> {
   double blueFirst = 255;
 
   // For second picker
-  double redSecond = 155;
+  double redSecond = 175;
   double greenSecond = 55;
   double blueSecond = 255;
+
+  // Add new gradient to database
+  void addGradient(GradientCard gradient) async {
+    var box = await Hive.openBox('gradient');
+    box.add(gradient);
+    gradient.save();
+    print("Hive put new gradient");
+  }
 
   Widget FirstPicker() {
     return new Column(
@@ -151,6 +162,10 @@ class _MainState extends State<Main> with AutomaticKeepAliveClientMixin<Main> {
   Widget build(BuildContext context) {
     super.build(context);
     return Scaffold(
+      appBar: CupertinoNavigationBar(
+        middle: new Text("UI Gradient", style: TextStyle(color: Colors.white)),
+        backgroundColor: Colors.deepPurple,
+      ),
       body: Stack(
         children: <Widget>[
           new Container(
@@ -181,24 +196,18 @@ class _MainState extends State<Main> with AutomaticKeepAliveClientMixin<Main> {
                         child: new CircleAvatar(
                           minRadius: 20,
                           maxRadius: 30,
-                          backgroundColor: Color.fromRGBO(redFirst.toInt(),
-                              greenFirst.toInt(), blueFirst.toInt(), 1),
+                          backgroundColor: Color.fromRGBO(redFirst.toInt(), greenFirst.toInt(), blueFirst.toInt(), 1),
                         ),
                       ),
-                      decoration: BoxDecoration(boxShadow: [
-                        BoxShadow(
-                            color: Color.fromRGBO(0, 0, 0, 0.3),
-                            spreadRadius: 2,
-                            blurRadius: 25)
-                      ]),
+                      decoration: BoxDecoration(
+                          boxShadow: [BoxShadow(color: Color.fromRGBO(0, 0, 0, 0.3), spreadRadius: 2, blurRadius: 25)]),
                     ),
                     new SizedBox(
                       width: MediaQuery.of(context).size.width * 0.1,
                     ),
                     new Text(
                       "#" +
-                          Color.fromRGBO(redFirst.toInt(), greenFirst.toInt(),
-                                  blueFirst.toInt(), 1)
+                          Color.fromRGBO(redFirst.toInt(), greenFirst.toInt(), blueFirst.toInt(), 1)
                               .value
                               .toRadixString(16)
                               .toString(),
@@ -208,25 +217,16 @@ class _MainState extends State<Main> with AutomaticKeepAliveClientMixin<Main> {
                 ),
               ),
               Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-
-                // TODO : Add new raised button to save gradients
-
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
                 child: Column(
                   children: <Widget>[
                     new Container(
                       height: 200,
                       decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              colors: [
-                                Color.fromRGBO(redFirst.toInt(),
-                                    greenFirst.toInt(), blueFirst.toInt(), 1),
-                                Color.fromRGBO(redSecond.toInt(),
-                                    greenSecond.toInt(), blueSecond.toInt(), 1)
-                              ]),
+                          gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [
+                            Color.fromRGBO(redFirst.toInt(), greenFirst.toInt(), blueFirst.toInt(), 1),
+                            Color.fromRGBO(redSecond.toInt(), greenSecond.toInt(), blueSecond.toInt(), 1)
+                          ]),
                           boxShadow: [
                             BoxShadow(
                                 color: Colors.black.withOpacity(0.3),
@@ -241,10 +241,21 @@ class _MainState extends State<Main> with AutomaticKeepAliveClientMixin<Main> {
                     ),
                     InkWell(
                       onTap: () {
-                        print("SAVED");
-                        Scaffold.of(context).showSnackBar(
-                            SnackBar(
-                                content: new Text("Gradient Saved")));
+                        GradientCard gradient =
+                            new GradientCard([redFirst, greenFirst, blueFirst], [redSecond, greenSecond, blueSecond]);
+                        addGradient(gradient);
+                        AwesomeDialog(
+                          context: context,
+                          animType: AnimType.SCALE,
+                          dialogType: DialogType.SUCCES,
+                          body: Center(
+                            child: Text(
+                              'Added to favorites 😍',
+                              style: TextStyle(fontStyle: FontStyle.italic),
+                            ),
+                          ),
+                          btnOkOnPress: () {},
+                        ).show();
                       },
                       splashColor: Colors.orange,
                       child: new Container(
@@ -253,8 +264,7 @@ class _MainState extends State<Main> with AutomaticKeepAliveClientMixin<Main> {
                         child: Center(
                             child: new Text(
                           "SAVE",
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold, color: Colors.white),
+                          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
                         )),
                         decoration: BoxDecoration(
                             gradient: LinearGradient(
@@ -268,8 +278,7 @@ class _MainState extends State<Main> with AutomaticKeepAliveClientMixin<Main> {
                                   blurRadius: 30,
                                   offset: Offset(5, 10))
                             ],
-                            borderRadius:
-                                BorderRadius.all(Radius.circular(20))),
+                            borderRadius: BorderRadius.all(Radius.circular(20))),
                       ),
                     ),
                   ],
@@ -283,8 +292,7 @@ class _MainState extends State<Main> with AutomaticKeepAliveClientMixin<Main> {
                     new Text(
                       //"RGB(12,14,14)",
                       "#" +
-                          Color.fromRGBO(redSecond.toInt(), greenSecond.toInt(),
-                                  blueSecond.toInt(), 1)
+                          Color.fromRGBO(redSecond.toInt(), greenSecond.toInt(), blueSecond.toInt(), 1)
                               .value
                               .toRadixString(16)
                               .toString(),
@@ -304,16 +312,12 @@ class _MainState extends State<Main> with AutomaticKeepAliveClientMixin<Main> {
                         child: new CircleAvatar(
                           minRadius: 20,
                           maxRadius: 30,
-                          backgroundColor: Color.fromRGBO(redSecond.toInt(),
-                              greenSecond.toInt(), blueSecond.toInt(), 1),
+                          backgroundColor:
+                              Color.fromRGBO(redSecond.toInt(), greenSecond.toInt(), blueSecond.toInt(), 1),
                         ),
                       ),
-                      decoration: BoxDecoration(boxShadow: [
-                        BoxShadow(
-                            color: Color.fromRGBO(0, 0, 0, 0.3),
-                            spreadRadius: 4,
-                            blurRadius: 25)
-                      ]),
+                      decoration: BoxDecoration(
+                          boxShadow: [BoxShadow(color: Color.fromRGBO(0, 0, 0, 0.3), spreadRadius: 4, blurRadius: 25)]),
                     ),
                   ],
                 ),
@@ -328,6 +332,5 @@ class _MainState extends State<Main> with AutomaticKeepAliveClientMixin<Main> {
   }
 
   @override
-  // TODO: implement wantKeepAlive
   bool get wantKeepAlive => true;
 }

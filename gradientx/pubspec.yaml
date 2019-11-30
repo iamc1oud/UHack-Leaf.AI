@@ -29,6 +29,9 @@ dependencies:
   hive:
   hive_flutter:
   path_provider:
+  giffy_dialog:
+  awesome_dialog: ^0.0.5
+
 
 
 dev_dependencies:
