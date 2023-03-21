@@ -28,7 +28,7 @@ dependencies:
   path:
   http:
   image_picker: ^0.6.1+4
-  dio:
+  dio: any
 
 
 dev_dependencies:
